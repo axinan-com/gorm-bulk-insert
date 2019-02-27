@@ -74,7 +74,7 @@ func insertObjSet(db *gorm.DB, objects []interface{}, excludeColumns ...string) 
 		mainScope.SQLVars = append(mainScope.SQLVars, scope.SQLVars...)
 	}
 
-	mainScope.Raw(fmt.Sprintf("INSERT INTO %s (%s) VALUES %s",
+	mainScope.Raw(fmt.Sprintf("REPLACE INTO %s (%s) VALUES %s",
 		mainScope.QuotedTableName(),
 		strings.Join(dbColumns, ", "),
 		strings.Join(placeholders, ", "),
@@ -102,6 +102,9 @@ func extractMapValue(value interface{}, excludeColumns []string) (map[string]int
 			} else if field.StructField.HasDefaultValue && field.IsBlank {
 				// If default value presents and field is empty, assign a default value
 				if val, ok := field.TagSettingsGet("DEFAULT"); ok {
+                  			if val == "''" {
+                                            val = ""
+                                        }
 					attrs[field.DBName] = val
 				} else {
 					attrs[field.DBName] = field.Field.Interface()
